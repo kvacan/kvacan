@@ -7,8 +7,6 @@
     <link rel="icon" href="https://taplink.st/a/5/8/4/d/daec4f.jpg?1">
     <link rel="apple-touch-icon" href="https://taplink.st/a/5/8/4/d/daec4f.jpg?1">
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
-    <!-- Telegram Widget JS -->
-    <script async src="https://telegram.org/js/telegram-widget.js?23"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -194,20 +192,6 @@
         
         .post-image:hover {
             transform: scale(1.01);
-        }
-        
-        /* Telegram виджет */
-        .telegram-post {
-            margin: 12px 0;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 2px solid #b294ff;
-            background: transparent;
-        }
-        
-        .telegram-post iframe {
-            width: 100% !important;
-            border: none !important;
         }
         
         .loading {
@@ -672,19 +656,6 @@
                    url.includes('youtube.com/watch') || url.includes('youtu.be') || url.includes('vimeo.com');
         }
 
-        function isTelegramUrl(url) {
-            return url.includes('t.me/') && !url.includes('t.me/tvacan_bot');
-        }
-
-        function getTelegramPostId(url) {
-            // формат: https://t.me/username/post_id или https://t.me/c/channel_id/post_id
-            const match = url.match(/t\.me\/([^\/]+)\/(\d+)/);
-            if (match) {
-                return `${match[1]}/${match[2]}`;
-            }
-            return null;
-        }
-
         function getVideoEmbedUrl(url) {
             if (url.includes('youtube.com/watch')) {
                 let videoId = new URL(url).searchParams.get('v');
@@ -710,15 +681,7 @@
                 let mediaHtml = '';
                 if (post.mediaUrl && post.mediaUrl.trim()) {
                     let url = post.mediaUrl.trim();
-                    
-                    if (isTelegramUrl(url)) {
-                        const postId = getTelegramPostId(url);
-                        if (postId) {
-                            mediaHtml = `<div class="telegram-post"><script async src="https://telegram.org/js/telegram-widget.js?23" data-telegram-post="${postId}" data-width="100%"></script></div>`;
-                        } else {
-                            mediaHtml = `<a href="${url}" target="_blank" style="color:#b294ff; display:inline-block; margin-top:10px;">📨 Открыть в Telegram</a>`;
-                        }
-                    } else if (isImageUrl(url)) {
+                    if (isImageUrl(url)) {
                         mediaHtml = `<img class="post-image" src="${url}" onclick="openModalFromUrl('${url}')" loading="lazy">`;
                     } else if (isVideoUrl(url)) {
                         let embedUrl = getVideoEmbedUrl(url);
@@ -737,11 +700,6 @@
                     </div>
                 `;
             }).join('');
-            
-            // Telegram виджет требует повторной инициализации после добавления в DOM
-            if (window.TelegramWidget) {
-                window.TelegramWidget.init();
-            }
         }
 
         function openModalFromUrl(url) {
@@ -810,7 +768,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
-        
+        // ЗАГРУЗКА ПОСТОВ
         loadPosts();
     </script>
 </body>
