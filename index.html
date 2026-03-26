@@ -37,11 +37,11 @@
         .container {
             max-width: 500px;
             margin: 0 auto;
-            padding: 20px 16px 80px 16px;
+            padding: 20px 16px 80px;
             position: relative;
             z-index: 1;
         }
-        @media (min-width: 768px) { .container { max-width: 550px; padding: 30px 20px 80px 20px; } }
+        @media (min-width: 768px) { .container { max-width: 550px; } }
         .avatar {
             width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
             border: 3px solid #b294ff;
@@ -49,8 +49,8 @@
             box-shadow: 0 10px 25px rgba(160, 120, 255, 0.3);
         }
         h1 {
-            font-size: 3.5rem; text-align: center; letter-spacing: 1px; margin-bottom: 25px;
-            color: #fff; text-transform: uppercase;
+            font-size: 3.5rem; text-align: center; margin-bottom: 25px;
+            color: #fff;
             text-shadow: 0 0 15px rgba(180, 140, 255, 0.5);
         }
         .posts-block {
@@ -82,7 +82,6 @@
             color: #ddd;
             line-height: 1.5;
             font-family: system-ui, sans-serif;
-            margin-bottom: 12px;
             white-space: pre-wrap;
         }
         .post-content a { color: #d4b5ff; text-decoration: underline; }
@@ -92,7 +91,7 @@
             display: flex;
             overflow-x: auto;
             gap: 12px;
-            padding: 5px 0 15px 0;
+            padding: 5px 0 15px;
             scroll-snap-type: x mandatory;
         }
         .gallery-item {
@@ -119,7 +118,7 @@
         .block, .contacts-block { background: rgba(20, 10, 35, 0.85); border-radius: 30px; padding: 25px 18px; margin: 25px 0; border: 1px solid #b294ff; }
         .faq-item { margin-bottom: 12px; border: 1px solid #b294ff; border-radius: 20px; overflow: hidden; }
         .faq-question { background: rgba(35, 20, 55, 0.8); padding: 16px 18px; cursor: pointer; display: flex; justify-content: space-between; }
-        .faq-question::after { content: "▼"; color: #b294ff; }
+        .faq-question::after { content: "▼"; color: #b294ff; transition: transform 0.2s; }
         .faq-question.active::after { transform: rotate(180deg); }
         .faq-answer { background: rgba(20, 10, 30, 0.7); padding: 0 18px; max-height: 0; overflow: hidden; transition: max-height 0.2s; color: #ccc; }
         .faq-answer.show { padding: 16px 18px; max-height: 600px; }
@@ -131,7 +130,7 @@
         .chat-button span { font-size: 2rem; }
         .chat-menu { position: absolute; bottom: 70px; right: 0; width: 200px; background: #1a0f2a; border-radius: 25px; border: 2px solid #b294ff; padding: 15px; display: none; }
         .chat-menu.show { display: block; }
-        .chat-menu-item { display: block; background: #2a1a3a; padding: 12px; border-radius: 40px; text-align: center; color: #fff; text-decoration: none; border: 1px solid #b294ff; margin-bottom: 8px; }
+        .chat-menu-item { display: block; background: #2a1a3a; padding: 12px; border-radius: 40px; text-align: center; color: #fff; text-decoration: none; margin-bottom: 8px; border: 1px solid #b294ff; }
         footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #b294ff; text-align: center; color: #aaa; font-size: 0.8rem;}
         .footer-email a { color: #b294ff; text-decoration: none; }
         .gallery-hint { text-align: center; color: #b294ff; font-size: 0.8rem; margin-top: 5px; }
@@ -214,7 +213,7 @@
 
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <h3>🔐 Вход в админ-панель</h3>
+        <h3>🔐 Вход</h3>
         <input type="text" id="adminLogin" placeholder="Логин" value="kvacan">
         <input type="password" id="adminPassword" placeholder="Пароль">
         <button class="login-btn" onclick="attemptLogin()">Войти</button>
@@ -260,14 +259,14 @@
     </div>
     
     <div id="adminPanel" class="admin-panel">
-        <div class="section-title">🔐 Добавить пост</div>
+        <div class="section-title">🔐 Добавить пост (тест)</div>
         <div class="admin-form">
             <input type="text" id="postTitle" placeholder="Заголовок">
-            <textarea id="postText" placeholder="Текст поста"></textarea>
-            <input type="text" id="postVideoUrl" placeholder="Ссылка на видео (необязательно)">
-            <button class="admin-btn" onclick="publishPost()">📌 Опубликовать</button>
+            <textarea id="postText" placeholder="Текст"></textarea>
+            <input type="text" id="postVideoUrl" placeholder="Ссылка на видео">
+            <button class="admin-btn" onclick="publishPost()">📌 Опубликовать (локально)</button>
         </div>
-        <div class="section-subtitle">⚠️ Посты сохраняются в браузере. Для публикации для всех нужно дополнительное хранилище.</div>
+        <div class="section-subtitle">⚠️ Для всех постов: редактируйте Google Таблицу</div>
     </div>
     
     <div class="block">
@@ -305,43 +304,68 @@
 </div>
 
 <script>
-// ==================== ВАШ URL ИЗ GOOGLE APPS SCRIPT ====================
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzqxYSY-rMWZkR4FbuMFNoVl1eaMgjkNy4ccIgt38qKVJD6T99QRxREzPg7s3V1qb_nw/exec";
+// ==================== ВАША ССЫЛКА НА CSV (уже вставлена) ====================
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdSZzujU8slFBMeyFuo5r_Wo-IGtSD2XenkggmvSVDHxueB5v0JsZ2X90SPR5XlEb_JHXGYt2GCV-w/pub?output=csv";
 // ========================================================================
 
 let isAdmin = false;
 const ADMIN_LOGIN = "kvacan";
-const PASSWORD_HASH = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"; // "kvacan2025!"
+const PASSWORD_HASH = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 
-// Загрузка постов из Google Sheets через Apps Script
 async function loadPosts() {
     try {
-        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const response = await fetch(CSV_URL);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const posts = await response.json();
-        
-        // Проверяем, что пришел массив
-        if (Array.isArray(posts)) {
-            renderPosts(posts);
-        } else {
-            console.error('Неверный формат данных:', posts);
-            document.getElementById('postsContainer').innerHTML = 
-                '<div class="section-subtitle" style="color:#ff8888;">❌ Ошибка: неверный формат данных от сервера</div>';
-        }
+        const csvText = await response.text();
+        const posts = parseCSV(csvText);
+        renderPosts(posts);
     } catch(e) {
-        console.error('Ошибка загрузки:', e);
+        console.error('Ошибка:', e);
         document.getElementById('postsContainer').innerHTML = 
-            '<div class="section-subtitle" style="color:#ff8888;">❌ Ошибка загрузки постов. Проверьте настройки скрипта.</div>';
+            '<div class="section-subtitle" style="color:#ff8888;">❌ Ошибка загрузки. Проверьте ссылку на таблицу.</div>';
     }
+}
+
+function parseCSV(csvText) {
+    const lines = csvText.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return [];
+    
+    const posts = [];
+    for (let i = 1; i < lines.length; i++) {
+        const values = [];
+        let inQuote = false;
+        let current = '';
+        
+        for (let ch of lines[i]) {
+            if (ch === '"') {
+                inQuote = !inQuote;
+            } else if (ch === ',' && !inQuote) {
+                values.push(current);
+                current = '';
+            } else {
+                current += ch;
+            }
+        }
+        values.push(current);
+        
+        const clean = values.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
+        
+        if (clean[1] && clean[1].trim()) {
+            posts.push({
+                date: clean[0] || '',
+                title: clean[1] || '',
+                text: clean[2] || '',
+                videoUrl: clean[3] || ''
+            });
+        }
+    }
+    return posts;
 }
 
 function renderPosts(posts) {
     const container = document.getElementById('postsContainer');
-    if (!posts || posts.length === 0) {
+    if (!posts.length) {
         container.innerHTML = '<div class="section-subtitle">📭 Пока нет постов. Добавьте их в Google Таблицу!</div>';
         return;
     }
@@ -367,7 +391,7 @@ function renderPosts(posts) {
         
         return `
             <div class="post-item">
-                <div class="post-date">📅 ${post.date || 'дата не указана'}</div>
+                <div class="post-date">📅 ${post.date}</div>
                 <div class="post-title">${escapeHtml(post.title)}</div>
                 <div class="post-content">${textWithLinks}</div>
                 ${videoHtml}
@@ -386,8 +410,7 @@ function escapeHtml(str) {
     });
 }
 
-// Админ-панель (для демонстрации, посты сохраняются в localStorage)
-async function publishPost() {
+function publishPost() {
     if (!isAdmin) {
         alert('Доступ запрещен. Войдите в админ-панель (Shift + A)');
         return;
@@ -402,24 +425,11 @@ async function publishPost() {
         return;
     }
     
-    // Для демо сохраняем в localStorage (только для текущего пользователя)
-    const localPosts = JSON.parse(localStorage.getItem('kvacan_demo_posts') || '[]');
-    localPosts.unshift({
-        date: new Date().toISOString().slice(0, 10),
-        title: title,
-        text: text,
-        videoUrl: videoUrl
-    });
-    localStorage.setItem('kvacan_demo_posts', JSON.stringify(localPosts));
-    
-    alert('✅ Пост сохранен локально. Для публикации для всех нужно настроить запись в Google Sheets.');
+    alert('✅ Пост сохранен локально.\n\nДля публикации для всех — добавьте строку в Google Таблицу:\n' + CSV_URL.replace('?output=csv', '/edit'));
     
     document.getElementById('postTitle').value = '';
     document.getElementById('postText').value = '';
     document.getElementById('postVideoUrl').value = '';
-    
-    // Показываем объединенные посты (из Google Sheets + локальные)
-    loadPosts();
 }
 
 function attemptLogin() {
@@ -441,14 +451,13 @@ function logout() {
     isAdmin = false;
     document.getElementById('adminPanel').classList.remove('visible');
     document.getElementById('logoutBtn').classList.remove('visible');
-    alert('Вы вышли из админ-панели');
+    alert('Вы вышли');
 }
 
 function showLogin() {
     document.getElementById('loginOverlay').style.display = 'flex';
 }
 
-// Горячая клавиша Shift + A
 document.addEventListener('keydown', function(e) {
     if (e.shiftKey && e.key === 'A') {
         if (!isAdmin) showLogin();
@@ -460,7 +469,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Защита от копирования
 document.addEventListener('copy', e => { e.preventDefault(); alert('📛 Копирование контента запрещено'); return false; });
 document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
 document.addEventListener('dragstart', e => { e.preventDefault(); return false; });
