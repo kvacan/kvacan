@@ -210,7 +210,7 @@
             color: #b294ff;
         }
         
-        /* Модальное окно - без стрелок, только свайп */
+        /* Модальное окно */
         .modal {
             display: none;
             position: fixed;
@@ -223,7 +223,6 @@
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(5px);
-            touch-action: pan-x pinch-zoom;
         }
         
         .modal.show { display: flex; }
@@ -235,7 +234,7 @@
             border: 4px solid #b294ff;
             border-radius: 25px;
             box-shadow: 0 0 40px rgba(180, 140, 255, 0.6);
-            touch-action: pinch-zoom;
+            transition: transform 0.1s ease;
         }
         
         .modal-close {
@@ -247,6 +246,19 @@
             cursor: pointer;
             text-shadow: 0 0 15px #b294ff;
             z-index: 2001;
+        }
+        
+        /* Подсказка для свайпа */
+        .swipe-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 2002;
         }
         
         .divider {
@@ -495,17 +507,17 @@
         .footer-email a:hover { color: #d4b5ff; }
         .copyright { color: #888; }
         
-        /* Убираем подсказку галереи */
         .gallery-hint {
             display: none;
         }
     </style>
 </head>
 <body>
-    <!-- Модальное окно для фото (без стрелок) -->
+    <!-- Модальное окно для фото -->
     <div class="modal" id="photoModal" onclick="closeModalOnBackground(event)">
         <span class="modal-close" onclick="closeModal()">×</span>
-        <img class="modal-content" id="modalImage" src="">
+        <img class="modal-content" id="modalImage" src="" style="cursor: zoom-in;">
+        <div class="swipe-hint" id="swipeHint">← свайп влево/вправо →</div>
     </div>
 
     <div class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</div>
@@ -535,7 +547,7 @@
         
         <!-- БЛОК ПОСТОВ ИЗ GOOGLE ТАБЛИЦЫ -->
         <div class="posts-block">
-            <div class="section-title">📢 Актуальное</div>
+            <div class="section-title"> Актуальное</div>
             <div id="postsContainer"><div class="loading">Загрузка постов... ✨</div></div>
         </div>
         
@@ -630,12 +642,13 @@
 
     <script>
         // ==================== ПЕРЕМЕННЫЕ ====================
-        let currentImagesSet = [];    // текущий набор фото (галерея или пост)
-        let currentImageIndex = 0;
+        let currentGallerySet = [];    // текущий набор фото для листалки
+        let currentGalleryIndex = 0;
         let touchStartX = 0;
         let touchEndX = 0;
+        let isZoomed = false;
         
-        // Фото галереи (отдельно)
+        // Фото галереи (отдельный набор)
         const galleryImages = [
             "https://taplink.st/p/3/f/f/4/69250557.jpg?0",
             "https://taplink.st/p/4/f/f/b/69250559.jpg?0",
@@ -708,59 +721,66 @@
             return url;
         }
 
-        // Открытие галереи (отдельный набор фото)
+        // ==================== ФУНКЦИИ ДЛЯ ГАЛЕРЕИ ====================
         function openGalleryModal(index) {
-            currentImagesSet = [...galleryImages];
-            currentImageIndex = index;
+            currentGallerySet = [...galleryImages];
+            currentGalleryIndex = index;
             updateModalImage();
             document.getElementById('photoModal').classList.add('show');
+            document.getElementById('swipeHint').style.display = 'block';
         }
 
-        // Открытие фото из поста (только это фото, без листалки)
         function openPostImage(url) {
-            currentImagesSet = [url];
-            currentImageIndex = 0;
+            currentGallerySet = [url];
+            currentGalleryIndex = 0;
             updateModalImage();
             document.getElementById('photoModal').classList.add('show');
+            document.getElementById('swipeHint').style.display = 'none';
         }
 
-        // Открытие аватарки (без листалки)
         function openAvatarModal() {
             const avatarUrl = document.querySelector('.avatar')?.src;
             if (avatarUrl) {
-                currentImagesSet = [avatarUrl];
-                currentImageIndex = 0;
+                currentGallerySet = [avatarUrl];
+                currentGalleryIndex = 0;
                 updateModalImage();
                 document.getElementById('photoModal').classList.add('show');
+                document.getElementById('swipeHint').style.display = 'none';
             }
         }
 
         function updateModalImage() {
             const img = document.getElementById('modalImage');
-            if (currentImagesSet.length > 0 && currentImageIndex >= 0 && currentImageIndex < currentImagesSet.length) {
-                img.src = currentImagesSet[currentImageIndex];
+            if (currentGallerySet.length > 0 && currentGalleryIndex >= 0 && currentGalleryIndex < currentGallerySet.length) {
+                img.src = currentGallerySet[currentGalleryIndex];
             }
+            // Сбрасываем zoom
+            img.style.transform = 'scale(1)';
+            img.style.cursor = 'zoom-in';
+            isZoomed = false;
         }
 
         function nextImage() {
-            if (currentImagesSet.length <= 1) return;
-            currentImageIndex = (currentImageIndex + 1) % currentImagesSet.length;
+            if (currentGallerySet.length <= 1) return;
+            currentGalleryIndex = (currentGalleryIndex + 1) % currentGallerySet.length;
             updateModalImage();
         }
 
         function prevImage() {
-            if (currentImagesSet.length <= 1) return;
-            currentImageIndex = (currentImageIndex - 1 + currentImagesSet.length) % currentImagesSet.length;
+            if (currentGallerySet.length <= 1) return;
+            currentGalleryIndex = (currentGalleryIndex - 1 + currentGallerySet.length) % currentGallerySet.length;
             updateModalImage();
         }
 
-        // Обработка свайпов
+        // ==================== ОБРАБОТЧИКИ СОБЫТИЙ ====================
+        
+        // Свайп для листалки
         function handleTouchStart(event) {
             touchStartX = event.touches[0].clientX;
         }
 
         function handleTouchEnd(event) {
-            if (currentImagesSet.length <= 1) return;
+            if (currentGallerySet.length <= 1) return;
             touchEndX = event.changedTouches[0].clientX;
             const swipeThreshold = 50;
             if (touchEndX < touchStartX - swipeThreshold) {
@@ -768,6 +788,55 @@
             }
             if (touchEndX > touchStartX + swipeThreshold) {
                 prevImage();
+            }
+        }
+        
+        // Пинч-зум (увеличение двумя пальцами) и клик для зума
+        let initialDistance = 0;
+        let currentScale = 1;
+        
+        function handleTouchStartZoom(event) {
+            if (event.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    event.touches[0].clientX - event.touches[1].clientX,
+                    event.touches[0].clientY - event.touches[1].clientY
+                );
+            }
+        }
+        
+        function handleTouchMoveZoom(event) {
+            if (event.touches.length === 2 && initialDistance > 0) {
+                event.preventDefault();
+                const newDistance = Math.hypot(
+                    event.touches[0].clientX - event.touches[1].clientX,
+                    event.touches[0].clientY - event.touches[1].clientY
+                );
+                const scale = newDistance / initialDistance;
+                currentScale = Math.min(Math.max(1, scale), 3);
+                const img = document.getElementById('modalImage');
+                img.style.transform = `scale(${currentScale})`;
+                img.style.cursor = currentScale > 1 ? 'zoom-out' : 'zoom-in';
+                isZoomed = currentScale > 1;
+                initialDistance = newDistance;
+            }
+        }
+        
+        function handleTouchEndZoom() {
+            initialDistance = 0;
+        }
+        
+        // Клик для зума (альтернатива)
+        function toggleZoom(event) {
+            event.stopPropagation();
+            const img = document.getElementById('modalImage');
+            if (isZoomed) {
+                img.style.transform = 'scale(1)';
+                img.style.cursor = 'zoom-in';
+                isZoomed = false;
+            } else {
+                img.style.transform = 'scale(2)';
+                img.style.cursor = 'zoom-out';
+                isZoomed = true;
             }
         }
 
@@ -779,8 +848,12 @@
 
         function closeModal() {
             document.getElementById('photoModal').classList.remove('show');
+            const img = document.getElementById('modalImage');
+            img.style.transform = 'scale(1)';
+            isZoomed = false;
         }
 
+        // ==================== РЕНДЕРИНГ ПОСТОВ ====================
         function renderPosts(posts) {
             const container = document.getElementById('postsContainer');
             if (!posts.length) {
@@ -846,15 +919,28 @@
             }
         });
         
-        // Добавляем обработчики свайпов для модального окна
+        // Добавляем обработчики для модального окна
         const modal = document.getElementById('photoModal');
+        const modalImg = document.getElementById('modalImage');
         if (modal) {
             modal.addEventListener('touchstart', handleTouchStart, false);
             modal.addEventListener('touchend', handleTouchEnd, false);
+            modal.addEventListener('touchstart', handleTouchStartZoom, false);
+            modal.addEventListener('touchmove', handleTouchMoveZoom, false);
+            modal.addEventListener('touchend', handleTouchEndZoom, false);
+        }
+        if (modalImg) {
+            modalImg.addEventListener('click', toggleZoom);
         }
         
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeModal();
+            if (e.key === 'ArrowLeft' && document.getElementById('photoModal').classList.contains('show')) {
+                prevImage();
+            }
+            if (e.key === 'ArrowRight' && document.getElementById('photoModal').classList.contains('show')) {
+                nextImage();
+            }
         });
         
         window.addEventListener('scroll', function() {
