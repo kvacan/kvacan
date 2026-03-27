@@ -33,45 +33,6 @@
             100% { background-position: 0% 50%; }
         }
         
-        /* ГИРЛЯНДА СВЕРХУ */
-        .garland {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 12px 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px);
-            z-index: 15;
-            pointer-events: none;
-            flex-wrap: wrap;
-        }
-        
-        .garland span {
-            font-size: 1.8rem;
-            animation: blink 1.2s ease-in-out infinite;
-            text-shadow: 0 0 10px #ff3366;
-        }
-        
-        .garland span:nth-child(1) { animation-delay: 0s; }
-        .garland span:nth-child(2) { animation-delay: 0.3s; }
-        .garland span:nth-child(3) { animation-delay: 0.6s; }
-        .garland span:nth-child(4) { animation-delay: 0.9s; }
-        .garland span:nth-child(5) { animation-delay: 1.2s; }
-        .garland span:nth-child(6) { animation-delay: 1.5s; }
-        .garland span:nth-child(7) { animation-delay: 1.8s; }
-        .garland span:nth-child(8) { animation-delay: 2.1s; }
-        .garland span:nth-child(9) { animation-delay: 2.4s; }
-        .garland span:nth-child(10) { animation-delay: 2.7s; }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 0.3; transform: scale(0.9); text-shadow: 0 0 5px #ff3366; }
-            50% { opacity: 1; transform: scale(1.2); text-shadow: 0 0 20px #ff6699, 0 0 30px #ff3366; }
-        }
-        
         /* ПАДАЮЩИЕ СМАЙЛИКИ НА ФОНЕ */
         .falling-skulls {
             position: fixed;
@@ -87,24 +48,25 @@
         .falling-skull {
             position: absolute;
             font-size: 1.2rem;
-            opacity: 0.5;
+            opacity: 0.6;
             animation: fall linear infinite;
             pointer-events: none;
+            will-change: transform;
         }
         
         @keyframes fall {
             0% {
-                transform: translateY(-20vh) rotate(0deg);
+                transform: translateY(-5vh) rotate(0deg);
                 opacity: 0;
             }
-            15% {
+            5% {
                 opacity: 0.6;
             }
-            85% {
+            95% {
                 opacity: 0.6;
             }
             100% {
-                transform: translateY(100vh) rotate(360deg);
+                transform: translateY(105vh) rotate(360deg);
                 opacity: 0;
             }
         }
@@ -189,12 +151,12 @@
         .container {
             max-width: 500px;
             margin: 0 auto;
-            padding: 70px 16px 80px 16px;
+            padding: 20px 16px 80px 16px;
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
         
-        @media (min-width: 768px) { .container { max-width: 550px; padding: 70px 20px 80px 20px; } }
+        @media (min-width: 768px) { .container { max-width: 550px; padding: 30px 20px 80px 20px; } }
         
         @keyframes softPulse {
             0% { transform: scale(1); box-shadow: 0 5px 15px rgba(180, 120, 255, 0.3); }
@@ -640,12 +602,6 @@
     </style>
 </head>
 <body>
-    <!-- ГИРЛЯНДА СВЕРХУ -->
-    <div class="garland">
-        <span>💀</span><span>🖤</span><span>😈</span><span>💀</span><span>🖤</span>
-        <span>😈</span><span>💀</span><span>🖤</span><span>😈</span><span>💀</span>
-    </div>
-    
     <!-- ПАДАЮЩИЕ СМАЙЛИКИ НА ФОНЕ -->
     <div class="falling-skulls" id="fallingSkullsContainer"></div>
     
@@ -794,19 +750,30 @@
             const size = Math.random() * 1.2 + 0.8;
             skull.style.fontSize = `${size}rem`;
             skull.style.left = `${Math.random() * 100}%`;
-            const duration = Math.random() * 6 + 5;
+            const duration = Math.random() * 10 + 8;
             skull.style.animationDuration = `${duration}s`;
-            skull.style.animationDelay = `${Math.random() * 8}s`;
+            // Случайная начальная позиция по Y, чтобы смайлики не скапливались вверху
+            const startY = Math.random() * -80;
+            skull.style.transform = `translateY(${startY}vh)`;
+            // Случайная задержка от 0 до 5 секунд
+            skull.style.animationDelay = `${Math.random() * 5}s`;
             fallingContainer.appendChild(skull);
             
             setTimeout(() => {
-                skull.remove();
-            }, duration * 1000 + 1000);
+                if (skull && skull.parentNode) {
+                    skull.remove();
+                }
+            }, duration * 1000 + 3000);
         }
         
-        setInterval(createFallingSkull, 500);
-        for (let i = 0; i < 30; i++) {
-            setTimeout(createFallingSkull, i * 150);
+        // Создаём смайлики с равномерными интервалами
+        setInterval(createFallingSkull, 350);
+        
+        // Создаём начальные смайлики с большими интервалами и разной стартовой позицией
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                createFallingSkull();
+            }, i * 200);
         }
         
         // ==================== КАРУСЕЛЬ ГАЛЕРЕИ ====================
