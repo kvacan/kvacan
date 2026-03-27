@@ -33,8 +33,47 @@
             100% { background-position: 0% 50%; }
         }
         
-        /* АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ НА ФОНЕ - СВЕРХУ ВНИЗ */
-        .floating-skulls {
+        /* ГИРЛЯНДА СВЕРХУ */
+        .garland {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 12px 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            z-index: 15;
+            pointer-events: none;
+            flex-wrap: wrap;
+        }
+        
+        .garland span {
+            font-size: 1.8rem;
+            animation: blink 1.2s ease-in-out infinite;
+            text-shadow: 0 0 10px #ff3366;
+        }
+        
+        .garland span:nth-child(1) { animation-delay: 0s; }
+        .garland span:nth-child(2) { animation-delay: 0.3s; }
+        .garland span:nth-child(3) { animation-delay: 0.6s; }
+        .garland span:nth-child(4) { animation-delay: 0.9s; }
+        .garland span:nth-child(5) { animation-delay: 1.2s; }
+        .garland span:nth-child(6) { animation-delay: 1.5s; }
+        .garland span:nth-child(7) { animation-delay: 1.8s; }
+        .garland span:nth-child(8) { animation-delay: 2.1s; }
+        .garland span:nth-child(9) { animation-delay: 2.4s; }
+        .garland span:nth-child(10) { animation-delay: 2.7s; }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; transform: scale(0.9); text-shadow: 0 0 5px #ff3366; }
+            50% { opacity: 1; transform: scale(1.2); text-shadow: 0 0 20px #ff6699, 0 0 30px #ff3366; }
+        }
+        
+        /* ПАДАЮЩИЕ СМАЙЛИКИ НА ФОНЕ */
+        .falling-skulls {
             position: fixed;
             top: 0;
             left: 0;
@@ -45,24 +84,24 @@
             overflow: hidden;
         }
         
-        .skull {
+        .falling-skull {
             position: absolute;
             font-size: 1.2rem;
             opacity: 0.5;
-            animation: fallSkull linear infinite;
+            animation: fall linear infinite;
             pointer-events: none;
         }
         
-        @keyframes fallSkull {
+        @keyframes fall {
             0% {
                 transform: translateY(-20vh) rotate(0deg);
                 opacity: 0;
             }
-            10% {
-                opacity: 0.5;
+            15% {
+                opacity: 0.6;
             }
-            90% {
-                opacity: 0.5;
+            85% {
+                opacity: 0.6;
             }
             100% {
                 transform: translateY(100vh) rotate(360deg);
@@ -70,15 +109,92 @@
             }
         }
         
+        /* ГАЛЕРЕЯ ФОТОГРАФИЙ */
+        .photo-gallery {
+            background: rgba(50, 30, 80, 0.85);
+            border-radius: 30px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 1px solid #d4a5ff;
+            backdrop-filter: blur(8px);
+            text-align: center;
+        }
+        
+        .photo-gallery-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #fff;
+            text-shadow: 0 0 10px #d4a5ff;
+            letter-spacing: 1px;
+        }
+        
+        .gallery-carousel {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 2px solid #d4a5ff;
+            background: #1a0a2a;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.3s ease-out;
+            cursor: grab;
+        }
+        
+        .carousel-track:active {
+            cursor: grabbing;
+        }
+        
+        .carousel-slide {
+            flex: 0 0 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #2a1a4a;
+        }
+        
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+        
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(212, 165, 255, 0.4);
+            border: 1px solid #d4a5ff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .indicator.active {
+            background: #d4a5ff;
+            transform: scale(1.2);
+            box-shadow: 0 0 10px #d4a5ff;
+        }
+        
         .container {
             max-width: 500px;
             margin: 0 auto;
-            padding: 20px 16px 80px 16px;
+            padding: 70px 16px 80px 16px;
             position: relative;
             z-index: 1;
         }
         
-        @media (min-width: 768px) { .container { max-width: 550px; padding: 30px 20px 80px 20px; } }
+        @media (min-width: 768px) { .container { max-width: 550px; padding: 70px 20px 80px 20px; } }
         
         @keyframes softPulse {
             0% { transform: scale(1); box-shadow: 0 5px 15px rgba(180, 120, 255, 0.3); }
@@ -114,56 +230,6 @@
             color: #fff; text-transform: uppercase;
             text-shadow: 0 0 25px rgba(200, 140, 255, 0.9);
             animation: glowPulse 2s infinite alternate;
-        }
-        
-        .gallery-container {
-            margin: 30px 0 20px;
-            position: relative;
-        }
-        
-        .gallery-scroll {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            padding: 5px 0 15px 0;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: #d4a5ff #2a1a4a;
-        }
-        
-        .gallery-scroll::-webkit-scrollbar {
-            height: 6px;
-        }
-        
-        .gallery-scroll::-webkit-scrollbar-track {
-            background: #2a1a4a;
-            border-radius: 10px;
-        }
-        
-        .gallery-scroll::-webkit-scrollbar-thumb {
-            background: #d4a5ff;
-            border-radius: 10px;
-        }
-        
-        .gallery-item {
-            flex: 0 0 auto;
-            width: 150px;
-            height: 150px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 20px;
-            border: 3px solid #d4a5ff;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s;
-            box-shadow: 0 5px 20px rgba(180, 100, 255, 0.4);
-            scroll-snap-align: start;
-        }
-        
-        .gallery-item:hover { transform: scale(1.03); border-color: #f0ccff; box-shadow: 0 8px 25px rgba(200, 120, 255, 0.6); }
-        
-        @media (max-width: 480px) {
-            .gallery-item { width: 130px; height: 130px; }
         }
         
         /* Стили для постов */
@@ -286,7 +352,6 @@
             transform: scale(1.1);
         }
         
-        /* Кнопки навигации */
         .modal-prev, .modal-next {
             position: absolute;
             top: 50%;
@@ -575,8 +640,14 @@
     </style>
 </head>
 <body>
-    <!-- АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ -->
-    <div class="floating-skulls" id="skullsContainer"></div>
+    <!-- ГИРЛЯНДА СВЕРХУ -->
+    <div class="garland">
+        <span>💀</span><span>🖤</span><span>😈</span><span>💀</span><span>🖤</span>
+        <span>😈</span><span>💀</span><span>🖤</span><span>😈</span><span>💀</span>
+    </div>
+    
+    <!-- ПАДАЮЩИЕ СМАЙЛИКИ НА ФОНЕ -->
+    <div class="falling-skulls" id="fallingSkullsContainer"></div>
     
     <!-- Модальное окно для фото -->
     <div class="modal" id="photoModal" onclick="closeModalOnBackground(event)">
@@ -601,12 +672,17 @@
         
         <div class="divider">✦ ✦ ✦</div>
         
-        <div class="gallery-container">
-            <div class="gallery-scroll">
-                <div class="gallery-item" style="background-image:url('https://taplink.st/p/3/f/f/4/69250557.jpg?0')" onclick="openGalleryModal(0)"></div>
-                <div class="gallery-item" style="background-image:url('https://taplink.st/p/4/f/f/b/69250559.jpg?0')" onclick="openGalleryModal(1)"></div>
-                <div class="gallery-item" style="background-image:url('https://taplink.st/p/2/2/3/c/69471405.jpg?0')" onclick="openGalleryModal(2)"></div>
+        <!-- ГАЛЕРЕЯ ФОТОГРАФИЙ -->
+        <div class="photo-gallery">
+            <div class="photo-gallery-title">ГАЛЕРЕЯ ФОТОГРАФИЙ</div>
+            <div class="gallery-carousel" id="galleryCarousel">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="carousel-slide"><img src="https://taplink.st/p/3/f/f/4/69250557.jpg?0" alt="Фото 1"></div>
+                    <div class="carousel-slide"><img src="https://taplink.st/p/4/f/f/b/69250559.jpg?0" alt="Фото 2"></div>
+                    <div class="carousel-slide"><img src="https://taplink.st/p/2/2/3/c/69471405.jpg?0" alt="Фото 3"></div>
+                </div>
             </div>
+            <div class="carousel-indicators" id="carouselIndicators"></div>
         </div>
         
         <div class="arrow-down">▼</div>
@@ -707,43 +783,143 @@
     </div>
 
     <script>
-        // ==================== СОЗДАНИЕ ЛЕТАЮЩИХ СМАЙЛИКОВ-ЧЕРЕПОВ ====================
-        const skulls = ['💀', '☠️', '💀', '🎃', '👻', '💀', '☠️', '🎃', '👻'];
-        const skullsContainer = document.getElementById('skullsContainer');
+        // ==================== ПАДАЮЩИЕ СМАЙЛИКИ ====================
+        const fallSkulls = ['💀', '🖤', '😈'];
+        const fallingContainer = document.getElementById('fallingSkullsContainer');
         
-        function createSkull() {
+        function createFallingSkull() {
             const skull = document.createElement('div');
-            skull.className = 'skull';
-            skull.textContent = skulls[Math.floor(Math.random() * skulls.length)];
+            skull.className = 'falling-skull';
+            skull.textContent = fallSkulls[Math.floor(Math.random() * fallSkulls.length)];
             const size = Math.random() * 1.2 + 0.8;
             skull.style.fontSize = `${size}rem`;
             skull.style.left = `${Math.random() * 100}%`;
             const duration = Math.random() * 6 + 5;
             skull.style.animationDuration = `${duration}s`;
             skull.style.animationDelay = `${Math.random() * 8}s`;
-            skullsContainer.appendChild(skull);
+            fallingContainer.appendChild(skull);
             
             setTimeout(() => {
                 skull.remove();
             }, duration * 1000 + 1000);
         }
         
-        setInterval(createSkull, 400);
-        for (let i = 0; i < 25; i++) {
-            setTimeout(createSkull, i * 150);
+        setInterval(createFallingSkull, 500);
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createFallingSkull, i * 150);
         }
+        
+        // ==================== КАРУСЕЛЬ ГАЛЕРЕИ ====================
+        const track = document.getElementById('carouselTrack');
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicatorsContainer = document.getElementById('carouselIndicators');
+        let currentIndex = 0;
+        let startX = 0;
+        let isDragging = false;
+        
+        // Создаём индикаторы
+        slides.forEach((_, i) => {
+            const indicator = document.createElement('div');
+            indicator.classList.add('indicator');
+            if (i === 0) indicator.classList.add('active');
+            indicator.addEventListener('click', () => goToSlide(i));
+            indicatorsContainer.appendChild(indicator);
+        });
+        
+        const indicators = document.querySelectorAll('.indicator');
+        
+        function updateIndicators() {
+            indicators.forEach((ind, i) => {
+                if (i === currentIndex) {
+                    ind.classList.add('active');
+                } else {
+                    ind.classList.remove('active');
+                }
+            });
+        }
+        
+        function goToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= slides.length) index = slides.length - 1;
+            currentIndex = index;
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            updateIndicators();
+        }
+        
+        function nextSlide() {
+            if (currentIndex < slides.length - 1) {
+                goToSlide(currentIndex + 1);
+            } else {
+                goToSlide(0);
+            }
+        }
+        
+        function prevSlide() {
+            if (currentIndex > 0) {
+                goToSlide(currentIndex - 1);
+            } else {
+                goToSlide(slides.length - 1);
+            }
+        }
+        
+        // Свайп для мобильных
+        track.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+        
+        track.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const moveX = e.touches[0].clientX;
+            const diff = moveX - startX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    prevSlide();
+                } else {
+                    nextSlide();
+                }
+                isDragging = false;
+            }
+        });
+        
+        track.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+        
+        // Мышь для десктопа
+        track.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+            track.style.cursor = 'grabbing';
+        });
+        
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const moveX = e.clientX;
+            const diff = moveX - startX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    prevSlide();
+                } else {
+                    nextSlide();
+                }
+                isDragging = false;
+                track.style.cursor = 'grab';
+            }
+        });
+        
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            track.style.cursor = 'grab';
+        });
+        
+        track.style.cursor = 'grab';
         
         // ==================== ПЕРЕМЕННЫЕ ====================
         let currentGallerySet = [];
         let currentGalleryIndex = 0;
         let touchStartX = 0;
         let touchEndX = 0;
-        
-        const galleryImages = [
-            "https://taplink.st/p/3/f/f/4/69250557.jpg?0",
-            "https://taplink.st/p/4/f/f/b/69250559.jpg?0",
-            "https://taplink.st/p/2/2/3/c/69471405.jpg?0"
-        ];
         
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdSZzujU8slFBMeyFuo5r_Wo-IGtSD2XenkggmvSVDHxueB5v0JsZ2X90SPR5XlEb_JHXGYt2GCV-w/pub?output=csv";
         
@@ -811,14 +987,7 @@
             return url;
         }
 
-        // ==================== ФУНКЦИИ ДЛЯ ГАЛЕРЕИ ====================
-        function openGalleryModal(index) {
-            currentGallerySet = [...galleryImages];
-            currentGalleryIndex = index;
-            updateModalImage();
-            document.getElementById('photoModal').classList.add('show');
-        }
-
+        // ==================== ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА ====================
         function openPostImage(url) {
             currentGallerySet = [url];
             currentGalleryIndex = 0;
@@ -908,7 +1077,7 @@
                 const textWithLinks = post.text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
                 return `
                     <div class="post-item">
-                        <div class="post-date">📅 ${post.date}</div>
+                        <div class="post-date">${post.date}</div>
                         <div class="post-title">${escapeHtml(post.title)}</div>
                         <div class="post-content">${textWithLinks}</div>
                         ${mediaHtml}
