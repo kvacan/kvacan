@@ -210,7 +210,7 @@
             color: #b294ff;
         }
         
-        /* Модальное окно для фото с поддержкой свайпов и пинч-зума */
+        /* Модальное окно - без стрелок, только свайп */
         .modal {
             display: none;
             position: fixed;
@@ -223,7 +223,7 @@
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(5px);
-            touch-action: pan-x pan-y pinch-zoom;
+            touch-action: pan-x pinch-zoom;
         }
         
         .modal.show { display: flex; }
@@ -235,7 +235,6 @@
             border: 4px solid #b294ff;
             border-radius: 25px;
             box-shadow: 0 0 40px rgba(180, 140, 255, 0.6);
-            transition: transform 0.1s ease;
             touch-action: pinch-zoom;
         }
         
@@ -248,42 +247,6 @@
             cursor: pointer;
             text-shadow: 0 0 15px #b294ff;
             z-index: 2001;
-        }
-        
-        /* Кнопки навигации */
-        .modal-prev, .modal-next {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #b294ff;
-            color: white;
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            z-index: 2001;
-        }
-        
-        .modal-prev { left: 20px; }
-        .modal-next { right: 20px; }
-        
-        .modal-prev:hover, .modal-next:hover {
-            background: #b294ff;
-            color: #0a0515;
-        }
-        
-        @media (max-width: 768px) {
-            .modal-prev, .modal-next {
-                width: 40px;
-                height: 40px;
-                font-size: 1.5rem;
-            }
         }
         
         .divider {
@@ -539,11 +502,9 @@
     </style>
 </head>
 <body>
-    <!-- Модальное окно для фото с листалкой -->
+    <!-- Модальное окно для фото (без стрелок) -->
     <div class="modal" id="photoModal" onclick="closeModalOnBackground(event)">
         <span class="modal-close" onclick="closeModal()">×</span>
-        <div class="modal-prev" onclick="prevImage(event)">‹</div>
-        <div class="modal-next" onclick="nextImage(event)">›</div>
         <img class="modal-content" id="modalImage" src="">
     </div>
 
@@ -564,10 +525,9 @@
         
         <div class="gallery-container">
             <div class="gallery-scroll">
-                <!-- Первое фото удалено, остались 3 -->
-                <div class="gallery-item" style="background-image:url('https://taplink.st/p/3/f/f/4/69250557.jpg?0')" onclick="openModalFromElement(this)"></div>
-                <div class="gallery-item" style="background-image:url('https://taplink.st/p/4/f/f/b/69250559.jpg?0')" onclick="openModalFromElement(this)"></div>
-                <div class="gallery-item" style="background-image:url('https://taplink.st/p/2/2/3/c/69471405.jpg?0')" onclick="openModalFromElement(this)"></div>
+                <div class="gallery-item" style="background-image:url('https://taplink.st/p/3/f/f/4/69250557.jpg?0')" onclick="openGalleryModal(0)"></div>
+                <div class="gallery-item" style="background-image:url('https://taplink.st/p/4/f/f/b/69250559.jpg?0')" onclick="openGalleryModal(1)"></div>
+                <div class="gallery-item" style="background-image:url('https://taplink.st/p/2/2/3/c/69471405.jpg?0')" onclick="openGalleryModal(2)"></div>
             </div>
         </div>
         
@@ -669,11 +629,18 @@
     </div>
 
     <script>
-        // ==================== ПЕРЕМЕННЫЕ ДЛЯ ГАЛЕРЕИ ====================
-        let allImages = [];      // массив всех URL изображений на странице
+        // ==================== ПЕРЕМЕННЫЕ ====================
+        let currentImagesSet = [];    // текущий набор фото (галерея или пост)
         let currentImageIndex = 0;
         let touchStartX = 0;
         let touchEndX = 0;
+        
+        // Фото галереи (отдельно)
+        const galleryImages = [
+            "https://taplink.st/p/3/f/f/4/69250557.jpg?0",
+            "https://taplink.st/p/4/f/f/b/69250559.jpg?0",
+            "https://taplink.st/p/2/2/3/c/69471405.jpg?0"
+        ];
         
         // ==================== ПОДКЛЮЧЕНИЕ GOOGLE ТАБЛИЦЫ ====================
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdSZzujU8slFBMeyFuo5r_Wo-IGtSD2XenkggmvSVDHxueB5v0JsZ2X90SPR5XlEb_JHXGYt2GCV-w/pub?output=csv";
@@ -741,71 +708,49 @@
             return url;
         }
 
-        // Функция для сбора всех изображений на странице (галерея + посты + аватарка)
-        function collectAllImages() {
-            allImages = [];
-            // Собираем из галереи
-            document.querySelectorAll('.gallery-item').forEach(el => {
-                let bg = window.getComputedStyle(el).backgroundImage;
-                let url = bg.slice(5, -2);
-                if (url && !url.includes('none')) allImages.push(url);
-            });
-            // Собираем из постов
-            document.querySelectorAll('.post-image').forEach(img => {
-                if (img.src) allImages.push(img.src);
-            });
-            // Добавляем аватарку
-            const avatarUrl = document.querySelector('.avatar')?.src;
-            if (avatarUrl) allImages.push(avatarUrl);
-        }
-
-        function openAvatarModal() {
-            const avatarUrl = document.querySelector('.avatar')?.src;
-            if (avatarUrl) {
-                openModalWithImage(avatarUrl);
-            }
-        }
-
-        function openModalFromElement(element) {
-            let bg = window.getComputedStyle(element).backgroundImage;
-            let imgSrc = bg.slice(5, -2);
-            if (imgSrc && !imgSrc.includes('none')) {
-                openModalWithImage(imgSrc);
-            }
-        }
-
-        function openModalFromUrl(url) {
-            openModalWithImage(url);
-        }
-
-        function openModalWithImage(url) {
-            collectAllImages();
-            currentImageIndex = allImages.findIndex(img => img === url);
-            if (currentImageIndex === -1) currentImageIndex = 0;
+        // Открытие галереи (отдельный набор фото)
+        function openGalleryModal(index) {
+            currentImagesSet = [...galleryImages];
+            currentImageIndex = index;
             updateModalImage();
             document.getElementById('photoModal').classList.add('show');
         }
 
-        function updateModalImage() {
-            const img = document.getElementById('modalImage');
-            if (allImages.length > 0 && currentImageIndex >= 0 && currentImageIndex < allImages.length) {
-                img.src = allImages[currentImageIndex];
-            }
-            // Сбрасываем трансформацию при смене изображения
-            img.style.transform = 'scale(1)';
+        // Открытие фото из поста (только это фото, без листалки)
+        function openPostImage(url) {
+            currentImagesSet = [url];
+            currentImageIndex = 0;
+            updateModalImage();
+            document.getElementById('photoModal').classList.add('show');
         }
 
-        function nextImage(event) {
-            if (event) event.stopPropagation();
-            if (allImages.length === 0) return;
-            currentImageIndex = (currentImageIndex + 1) % allImages.length;
+        // Открытие аватарки (без листалки)
+        function openAvatarModal() {
+            const avatarUrl = document.querySelector('.avatar')?.src;
+            if (avatarUrl) {
+                currentImagesSet = [avatarUrl];
+                currentImageIndex = 0;
+                updateModalImage();
+                document.getElementById('photoModal').classList.add('show');
+            }
+        }
+
+        function updateModalImage() {
+            const img = document.getElementById('modalImage');
+            if (currentImagesSet.length > 0 && currentImageIndex >= 0 && currentImageIndex < currentImagesSet.length) {
+                img.src = currentImagesSet[currentImageIndex];
+            }
+        }
+
+        function nextImage() {
+            if (currentImagesSet.length <= 1) return;
+            currentImageIndex = (currentImageIndex + 1) % currentImagesSet.length;
             updateModalImage();
         }
 
-        function prevImage(event) {
-            if (event) event.stopPropagation();
-            if (allImages.length === 0) return;
-            currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+        function prevImage() {
+            if (currentImagesSet.length <= 1) return;
+            currentImageIndex = (currentImageIndex - 1 + currentImagesSet.length) % currentImagesSet.length;
             updateModalImage();
         }
 
@@ -815,18 +760,16 @@
         }
 
         function handleTouchEnd(event) {
+            if (currentImagesSet.length <= 1) return;
             touchEndX = event.changedTouches[0].clientX;
             const swipeThreshold = 50;
             if (touchEndX < touchStartX - swipeThreshold) {
-                nextImage(event);
+                nextImage();
             }
             if (touchEndX > touchStartX + swipeThreshold) {
-                prevImage(event);
+                prevImage();
             }
         }
-
-        // Поддержка пинч-зума (двумя пальцами) через встроенную возможность браузера
-        // Добавляем touch-action: pinch-zoom в CSS и используем стандартное масштабирование
 
         function closeModalOnBackground(event) {
             if (event.target === document.getElementById('photoModal')) {
@@ -836,8 +779,6 @@
 
         function closeModal() {
             document.getElementById('photoModal').classList.remove('show');
-            const img = document.getElementById('modalImage');
-            img.style.transform = 'scale(1)';
         }
 
         function renderPosts(posts) {
@@ -852,7 +793,7 @@
                 if (post.mediaUrl && post.mediaUrl.trim()) {
                     let url = post.mediaUrl.trim();
                     if (isImageUrl(url)) {
-                        mediaHtml = `<img class="post-image" src="${url}" onclick="openModalFromUrl('${url}')" loading="lazy">`;
+                        mediaHtml = `<img class="post-image" src="${url}" onclick="openPostImage('${url}')" loading="lazy">`;
                     } else if (isVideoUrl(url)) {
                         let embedUrl = getVideoEmbedUrl(url);
                         mediaHtml = `<iframe class="post-video" src="${embedUrl}" frameborder="0" allowfullscreen allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture"></iframe>`;
@@ -870,9 +811,6 @@
                     </div>
                 `;
             }).join('');
-            
-            // После рендеринга постов собираем все изображения для листалки
-            setTimeout(collectAllImages, 100);
         }
 
         function escapeHtml(str) {
@@ -908,7 +846,7 @@
             }
         });
         
-        // Добавляем обработчики свайпов
+        // Добавляем обработчики свайпов для модального окна
         const modal = document.getElementById('photoModal');
         if (modal) {
             modal.addEventListener('touchstart', handleTouchStart, false);
@@ -917,12 +855,6 @@
         
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeModal();
-            if (e.key === 'ArrowLeft' && document.getElementById('photoModal').classList.contains('show')) {
-                prevImage(e);
-            }
-            if (e.key === 'ArrowRight' && document.getElementById('photoModal').classList.contains('show')) {
-                nextImage(e);
-            }
         });
         
         window.addEventListener('scroll', function() {
