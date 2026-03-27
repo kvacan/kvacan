@@ -70,6 +70,74 @@
             }
         }
         
+        /* ИГРОВОЙ БЛОК - ЛОПНИ ЧЕРЕП */
+        .game-block {
+            background: rgba(50, 30, 80, 0.9);
+            border-radius: 30px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px solid #d4a5ff;
+            backdrop-filter: blur(8px);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-block:hover {
+            transform: scale(1.02);
+            border-color: #ffccff;
+            box-shadow: 0 0 30px rgba(200, 120, 255, 0.6);
+        }
+        
+        .game-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 10px #ff88ff;
+        }
+        
+        .game-skull {
+            font-size: 4rem;
+            display: inline-block;
+            animation: shake 0.5s ease infinite;
+            filter: drop-shadow(0 0 15px #ff66ff);
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .game-skull:active {
+            transform: scale(0.9);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .pop-animation {
+            animation: popEffect 0.3s ease forwards !important;
+        }
+        
+        @keyframes popEffect {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        .score {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #ffccff;
+        }
+        
+        .score span {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffff88;
+        }
+        
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -575,7 +643,7 @@
     </style>
 </head>
 <body>
-    <!-- АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ -->
+    <!-- АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ НА ФОНЕ -->
     <div class="floating-skulls" id="skullsContainer"></div>
     
     <!-- Модальное окно для фото -->
@@ -600,6 +668,14 @@
         <h1>KVACAN</h1>
         
         <div class="divider">✦ ✦ ✦</div>
+        
+        <!-- ИГРОВОЙ БЛОК - ЛОПНИ ЧЕРЕП -->
+        <div class="game-block" id="gameBlock">
+            <div class="game-title">💀 ЛОПНИ ЧЕРЕП 💀</div>
+            <div class="game-skull" id="gameSkull">💀</div>
+            <div class="score">Счёт: <span id="scoreCount">0</span></div>
+            <div class="section-subtitle">👆 нажми на череп! 👆</div>
+        </div>
         
         <div class="gallery-container">
             <div class="gallery-scroll">
@@ -707,6 +783,56 @@
     </div>
 
     <script>
+        // ==================== ИГРА "ЛОПНИ ЧЕРЕП" ====================
+        let score = localStorage.getItem('skullScore') ? parseInt(localStorage.getItem('skullScore')) : 0;
+        const scoreElement = document.getElementById('scoreCount');
+        const gameSkull = document.getElementById('gameSkull');
+        
+        scoreElement.textContent = score;
+        
+        // Функция для вибрации (если поддерживается)
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        // Функция для анимации "лопания"
+        function popSkull() {
+            // Добавляем анимацию
+            gameSkull.classList.add('pop-animation');
+            
+            // Увеличиваем счёт
+            score++;
+            scoreElement.textContent = score;
+            localStorage.setItem('skullScore', score);
+            
+            // Вибрация
+            vibrate();
+            
+            // Меняем текст на "лопнувший" вариант
+            setTimeout(() => {
+                gameSkull.textContent = '💥';
+            }, 50);
+            
+            // Возвращаем череп
+            setTimeout(() => {
+                gameSkull.textContent = '💀';
+                gameSkull.classList.remove('pop-animation');
+                
+                // Иногда меняем на другой смайлик для разнообразия
+                const skullVariants = ['💀', '☠️', '💀', '💀', '👻'];
+                if (Math.random() > 0.7) {
+                    gameSkull.textContent = skullVariants[Math.floor(Math.random() * skullVariants.length)];
+                } else {
+                    gameSkull.textContent = '💀';
+                }
+            }, 200);
+        }
+        
+        // Назначаем обработчик клика на череп
+        gameSkull.addEventListener('click', popSkull);
+        
         // ==================== СОЗДАНИЕ ЛЕТАЮЩИХ СМАЙЛИКОВ-ЧЕРЕПОВ ====================
         const skulls = ['💀', '☠️', '💀', '☠️', '💀', '👻', '💀', '☠️'];
         const skullsContainer = document.getElementById('skullsContainer');
