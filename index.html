@@ -33,67 +33,39 @@
             100% { background-position: 0% 50%; }
         }
         
-        /* АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ НА ФОНЕ */
+        /* АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ НА ФОНЕ - СВЕРХУ ВНИЗ */
         .floating-skulls {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: auto;
+            pointer-events: none;
             z-index: 0;
             overflow: hidden;
         }
         
         .skull {
             position: absolute;
-            font-size: 1.8rem;
-            opacity: 0.6;
-            animation: floatSkull linear infinite;
-            cursor: pointer;
-            transition: transform 0.1s;
-            z-index: 10;
-            text-shadow: 0 0 5px rgba(255,255,200,0.5);
-            pointer-events: auto;
+            font-size: 1.2rem;
+            opacity: 0.5;
+            animation: fallSkull linear infinite;
+            pointer-events: none;
         }
         
-        .skull:hover {
-            transform: scale(1.2);
-            text-shadow: 0 0 15px #ffaa88;
-        }
-        
-        @keyframes floatSkull {
+        @keyframes fallSkull {
             0% {
-                transform: translateY(100vh) rotate(0deg);
+                transform: translateY(-20vh) rotate(0deg);
                 opacity: 0;
             }
-            15% {
-                opacity: 0.6;
+            10% {
+                opacity: 0.5;
             }
-            85% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-20vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-        
-        .pop-skull-animation {
-            animation: popEffect 0.25s ease forwards !important;
-        }
-        
-        @keyframes popEffect {
-            0% {
-                transform: scale(1) rotate(0deg);
-                opacity: 0.6;
-            }
-            50% {
-                transform: scale(1.6) rotate(25deg);
-                opacity: 0.9;
+            90% {
+                opacity: 0.5;
             }
             100% {
-                transform: scale(0) rotate(50deg);
+                transform: translateY(100vh) rotate(360deg);
                 opacity: 0;
             }
         }
@@ -104,7 +76,6 @@
             padding: 20px 16px 80px 16px;
             position: relative;
             z-index: 1;
-            pointer-events: auto;
         }
         
         @media (min-width: 768px) { .container { max-width: 550px; padding: 30px 20px 80px 20px; } }
@@ -604,7 +575,7 @@
     </style>
 </head>
 <body>
-    <!-- АНИМАЦИЯ ЛОПАЮЩИХСЯ СМАЙЛИКОВ-ЧЕРЕПОВ НА ФОНЕ -->
+    <!-- АНИМАЦИЯ СМАЙЛИКОВ-ЧЕРЕПОВ -->
     <div class="floating-skulls" id="skullsContainer"></div>
     
     <!-- Модальное окно для фото -->
@@ -736,85 +707,30 @@
     </div>
 
     <script>
-        // ==================== ЗВУК ДЛЯ ЛОПАНЬЯ ====================
-        function playPopSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                oscillator.frequency.value = 1200;
-                gainNode.gain.value = 0.15;
-                
-                oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.15);
-                oscillator.stop(audioCtx.currentTime + 0.15);
-                
-                audioCtx.resume();
-            } catch(e) {
-                // тишина если звук не поддерживается
-            }
-        }
-        
-        // Инициализация звука при первом клике на страницу
-        function initAudioOnFirstClick() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                ctx.resume();
-            } catch(e) {}
-            document.body.removeEventListener('click', initAudioOnFirstClick);
-        }
-        document.body.addEventListener('click', initAudioOnFirstClick);
-        
-        // ==================== СОЗДАНИЕ ЛЕТАЮЩИХ ЛОПАЮЩИХСЯ СМАЙЛИКОВ ====================
-        const skulls = ['💀', '☠️', '💀', '👻', '💀', '👾', '💀', '☠️', '🎃', '💀'];
+        // ==================== СОЗДАНИЕ ЛЕТАЮЩИХ СМАЙЛИКОВ-ЧЕРЕПОВ ====================
+        const skulls = ['💀', '☠️', '💀', '🎃', '👻', '💀', '☠️', '🎃', '👻'];
         const skullsContainer = document.getElementById('skullsContainer');
-        
-        function popSkull(skullElement, event) {
-            event.stopPropagation();
-            // Воспроизводим звук
-            playPopSound();
-            // Добавляем анимацию лопанья
-            skullElement.classList.add('pop-skull-animation');
-            // Удаляем элемент после анимации
-            setTimeout(() => {
-                if (skullElement && skullElement.parentNode) {
-                    skullElement.remove();
-                }
-            }, 250);
-        }
         
         function createSkull() {
             const skull = document.createElement('div');
             skull.className = 'skull';
             skull.textContent = skulls[Math.floor(Math.random() * skulls.length)];
-            const size = Math.random() * 1.5 + 1.2;
+            const size = Math.random() * 1.2 + 0.8;
             skull.style.fontSize = `${size}rem`;
             skull.style.left = `${Math.random() * 100}%`;
-            const duration = Math.random() * 10 + 8;
+            const duration = Math.random() * 6 + 5;
             skull.style.animationDuration = `${duration}s`;
-            skull.style.animationDelay = `${Math.random() * 5}s`;
-            
-            // Добавляем обработчик клика
-            skull.addEventListener('click', (e) => popSkull(skull, e));
-            
+            skull.style.animationDelay = `${Math.random() * 8}s`;
             skullsContainer.appendChild(skull);
             
             setTimeout(() => {
-                if (skull && skull.parentNode) {
-                    skull.remove();
-                }
-            }, duration * 1000 + 2000);
+                skull.remove();
+            }, duration * 1000 + 1000);
         }
         
-        // Создаём черепа с разной частотой
-        setInterval(createSkull, 600);
-        // Создаём начальные черепа
-        for (let i = 0; i < 20; i++) {
-            setTimeout(createSkull, i * 200);
+        setInterval(createSkull, 400);
+        for (let i = 0; i < 25; i++) {
+            setTimeout(createSkull, i * 150);
         }
         
         // ==================== ПЕРЕМЕННЫЕ ====================
